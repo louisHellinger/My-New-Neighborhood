@@ -43,6 +43,7 @@ export default class Nav extends React.Component {
       hideSignup: true,
 
       usernameError: false,
+      duplicateError: false,
       emailError: false,
       passwordError: false,
       ageError: false,
@@ -69,7 +70,7 @@ export default class Nav extends React.Component {
 
   componentDidMount() {
     axios.get('/auth/user').then(response => {
-      
+      console.log(response)
       if (!!response.data.user) {
         console.log('A user is currently logged in')
         this.setState({
@@ -109,9 +110,10 @@ export default class Nav extends React.Component {
     if (this.state.usernameInput.length < 6){
       this.setState({
         usernameError: true,
+        duplicateError: false,
         passwordError: false,
         emailError: false,
-        ageError: false,
+        ageError: false
       })
       return false;
     }
@@ -119,9 +121,10 @@ export default class Nav extends React.Component {
     if (this.state.passwordInput.length < 6 || !this.state.passwordInput.match(letterCapital)){
       this.setState({
         usernameError: false,
+        duplicateError: false,
         passwordError: true,
         emailError: false,
-        ageError: false,
+        ageError: false
       })
       return false;
     }
@@ -129,9 +132,10 @@ export default class Nav extends React.Component {
     if (!this.state.emailInput.match(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/)){
         this.setState({
         usernameError: false,
+        duplicateError: false,
         passwordError: false,
         emailError: true,
-        ageError: false,
+        ageError: false
       })
       return false;
     }
@@ -139,9 +143,10 @@ export default class Nav extends React.Component {
     if (parseInt(this.state.ageInput, 10) < 18 ){
       this.setState({
         usernameError: false,
+        duplicateError: false,
         passwordError: false,
         emailError: false,
-        ageError: true,
+        ageError: true
       })
       return false;
     }
@@ -166,8 +171,16 @@ export default class Nav extends React.Component {
           modal2IsOpen: false
         })
       } else {
-        console.log('Error: Duplicate entry')
-      }
+        console.log('Duplicate Username found.')
+        this.setState({
+          usernameError: false,
+          duplicateError: true,
+          passwordError: false,
+          emailError: false,
+          ageError: true
+          })
+        return false;
+       }
     })
   }
 
@@ -230,9 +243,12 @@ export default class Nav extends React.Component {
             usernameLogin: "",
             passwordLogin: ""
           })
-        } else {
+        }
+      })
+      .catch(error => {
+        if (error.response.status) {
           this.setState({
-            loginError: true,
+            loginError: true
           })
         }
       })
@@ -301,7 +317,7 @@ export default class Nav extends React.Component {
                 Login</button>
               </form>
               <hr></hr>
-              <p id="errorMessage" className={this.state.loginError ? '' : 'hidden'}>Please enter valid account credentials.</p>
+              <p id="errorMessage" className={this.state.loginError ? '' : 'hidden'}>Incorrect Username/Password. Please enter valid account credentials.</p>
             </div>
           </Modal>
           
@@ -381,6 +397,7 @@ export default class Nav extends React.Component {
             </form>
             <hr></hr>
             <p id="errorMessage" className={this.state.usernameError ? '' : 'hidden'}>Please enter a username at least 6 characters in length.</p>
+            <p id="errorMessage" className={this.state.duplicateError ? '' : 'hidden'}>That username already exists. Please enter a unique username.</p>
             <p id="errorMessage" className={this.state.passwordError ? '' : 'hidden'}>Please enter a password at least 6 characters in length containing<br>  
             </br>at least one number, capital letter, and special character.</p>
             <p id="errorMessage" className={this.state.emailError ? '' : 'hidden'}>Please enter a valid e-mail address in the following format: name@email.com.</p>
